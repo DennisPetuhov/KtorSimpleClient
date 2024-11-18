@@ -1,8 +1,13 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.jetbrains.kotlin.android)
-    kotlin("plugin.serialization").version("2.0.0")
+    alias(libs.plugins.ksp)
+    alias(libs.plugins.serialization)
+    alias(libs.plugins.ktorfit)
+    alias(libs.plugins.compose.compiler)
 }
+ktorfit {}
+ksp { arg("ktorfit", "true") }
 
 android {
     namespace = "com.example.ktorsimpleclient"
@@ -49,7 +54,6 @@ android {
         }
     }
 }
-val  ktor_version = "2.3.4"
 dependencies {
 
     implementation(libs.androidx.core.ktx)
@@ -67,15 +71,25 @@ dependencies {
     androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
-    implementation("io.ktor:ktor-client-core:$ktor_version")
-    implementation("io.ktor:ktor-client-cio:$ktor_version")
-    implementation("io.ktor:ktor-client-content-negotiation:$ktor_version")
-    implementation("io.ktor:ktor-serialization-kotlinx-json:$ktor_version")
-    implementation("io.ktor:ktor-serialization-kotlinx-xml:$ktor_version")
-    implementation("io.ktor:ktor-serialization-kotlinx-cbor:$ktor_version")
-    implementation("io.ktor:ktor-serialization-kotlinx-protobuf:$ktor_version")
-    implementation("io.ktor:ktor-client-logging:$ktor_version")
 
+    implementation(libs.androidx.lifecycle.viewmodel.ktx)
 
+    // Ktorfit
+    implementation(libs.ktorfit.lib)
+    implementation(libs.ktor.client.serialization)
+    implementation(libs.ktor.client.content.negotiation)
+    implementation(libs.ktor.serialization.kotlinx.json)
+    implementation(libs.ktorfit.converters.response)
+    implementation(libs.ktorfit.converters.call)
+    implementation(libs.ktorfit.converters.flow)
+    implementation(libs.ktor.client.android)
+    implementation(libs.ktor.ktor.client.logging)
+    implementation(libs.ktor.client.cio)
+    implementation(libs.ktor.client.websockets)
+    implementation(libs.kspApi)
 
+    implementation(libs.koin.android)
+    implementation (libs.koin.androidx.compose)
+    implementation(libs.koin.annotations)
+    ksp(libs.koin.ksp.compiler)
 }

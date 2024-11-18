@@ -14,19 +14,9 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import com.example.ktorsimpleclient.models.AssResponse
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.ktorsimpleclient.ui.theme.KtorSimpleClientTheme
-import io.ktor.client.HttpClient
-import io.ktor.client.call.body
-import io.ktor.client.engine.cio.CIO
-import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
-import io.ktor.client.request.get
-import io.ktor.http.ContentType
-import io.ktor.http.contentType
-import io.ktor.serialization.kotlinx.json.json
-import kotlinx.coroutines.runBlocking
-import kotlinx.serialization.ExperimentalSerializationApi
-import kotlinx.serialization.json.Json
+import org.koin.androidx.compose.koinViewModel
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -36,7 +26,6 @@ class MainActivity : ComponentActivity() {
             KtorSimpleClientTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
                     Greeting(
-                        onclick = { onclick() },
                         name = "Android",
                         modifier = Modifier.padding(innerPadding)
                     )
@@ -46,39 +35,11 @@ class MainActivity : ComponentActivity() {
     }
 }
 
-@OptIn(ExperimentalSerializationApi::class)
-fun onclick() {
-    println("Button clicked")
-    runBlocking {
-        val client = HttpClient(CIO) {
-
-            install(ContentNegotiation) {
-                json(Json {
-                    encodeDefaults = true
-                    prettyPrint = true
-                    isLenient = true
-                    ignoreUnknownKeys = true
-                    explicitNulls = false
-                })
-            }
-        }
-        val response = client.get("https://avalanche.ge/json")
-        if (response.contentType() == ContentType.Application.Json) {
-            val responseBody = response.body<AssResponse>()
-            println("ContentType.Application.Json   BODY = $responseBody")
-        } else {
-            println("Unexpected content type: ${response.contentType()}")
-            val responseBody = response.body<String>()
-            val responseHeader = response.headers.toString()
-            println("Response header: $responseHeader")
-            println("Response body: $responseBody")
-        }
-    }
-}
-
-
 @Composable
-fun Greeting(name: String, modifier: Modifier = Modifier, onclick: () -> Unit) {
+fun Greeting(name: String, modifier: Modifier = Modifier) {
+    val viewModel: MainScreenViewModel = koinViewModel()
+    val state = viewModel.stateFlow.collectAsStateWithLifecycle()
+
     Column(
         modifier = modifier,
         verticalArrangement = Arrangement.Center,
@@ -90,6 +51,6 @@ fun Greeting(name: String, modifier: Modifier = Modifier, onclick: () -> Unit) {
             text = "Hello $name!",
             modifier = modifier
         )
-        Button(onClick = { onclick() }) {}
+        Button(onClick = { viewModel.getSocket() }) {}
     }
 }
